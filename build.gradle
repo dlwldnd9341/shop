@@ -32,6 +32,9 @@ dependencies {
 	//시큐리티 테스트
 	testImplementation 'org.springframework.security:spring-security-test'
 
+	//타임리프에서 시프링시큐리티의 문법이나 형식을 지원하는 확장팩 라이브러리
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
