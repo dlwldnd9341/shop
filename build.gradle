@@ -35,6 +35,9 @@ dependencies {
 	//타임리프에서 시프링시큐리티의 문법이나 형식을 지원하는 확장팩 라이브러리
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 
+	//자동 필드 매핑
+	implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.4.2'
+
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
