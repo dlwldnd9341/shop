@@ -2,6 +2,7 @@ package com.shop.repository;
 
 import com.querydsl.core.QueryResults;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.shop.constant.ItemSellStatus;
 import com.shop.dto.ItemSearchDto;
@@ -18,18 +19,18 @@ import java.util.List;
 
 public class ItemRepositoryCustomImpl implements ItemRepositoryCustom{ //1
 
-    private JPAQueryFactory queryFactory; //2
+    private JPAQueryFactory queryFactory;
 
-    public ItemRepositoryCustomImpl(EntityManager em){ //3
+    public ItemRepositoryCustomImpl(EntityManager em){
         this.queryFactory = new JPAQueryFactory(em);
     }
 
-    private BooleanExpression searchSellStatusEq(ItemSellStatus searchSellStatus){ //4
+    private BooleanExpression searchSellStatusEq(ItemSellStatus searchSellStatus){
         return searchSellStatus == null ? null : QItem.item.itemSellStatus.eq(searchSellStatus);
     }
 
-    //BooleanExpression은 쿼리dsl에서 조건절을 구성할때 사용
-    private BooleanExpression regDtsAfter(String searchDateType){ //5
+    private BooleanExpression regDtsAfter(String searchDateType){
+
         LocalDateTime dateTime = LocalDateTime.now();
 
         if(StringUtils.equals("all", searchDateType) || searchDateType == null){
@@ -44,15 +45,15 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom{ //1
             dateTime = dateTime.minusMonths(6);
         }
 
-        return QItem.item.regTime.after(dateTime); //regTime이 dateTime객체보다 이후의 시간인지 확인
+        return QItem.item.regTime.after(dateTime);
     }
 
-    private BooleanExpression searchByLike(String searchBy, String searchQuery){ //6
+    private BooleanExpression searchByLike(String searchBy, String searchQuery){
 
         if(StringUtils.equals("itemNm", searchBy)){
-            return QItem.item.itemNm.like("%" + searchQuery + " %");
-        } else if(StringUtils.equals("createBy", searchBy)){
-            return QItem.item.createBy.like("%" + searchQuery + "%");
+            return QItem.item.itemNm.like("%" + searchQuery + "%");
+        } else if(StringUtils.equals("createdBy", searchBy)){
+            return QItem.item.createdBy.like("%" + searchQuery + "%");
         }
 
         return null;
@@ -60,7 +61,8 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom{ //1
 
     @Override
     public Page<Item> getAdminItemPage(ItemSearchDto itemSearchDto, Pageable pageable){
-        QueryResults<Item> results = queryFactory //7
+
+        List<Item> content = queryFactory
                 .selectFrom(QItem.item)
                 .where(regDtsAfter(itemSearchDto.getSearchDateType()),
                         searchSellStatusEq(itemSearchDto.getSearchSellStatus()),
@@ -68,10 +70,14 @@ public class ItemRepositoryCustomImpl implements ItemRepositoryCustom{ //1
                 .orderBy(QItem.item.id.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .fetchResults();
+                .fetch();
 
-        List<Item> content = results.getResults();  //조회 대상 리스트
-        long total = results.getTotal();            //조회 개수
+        Long total = queryFactory.select(Wildcard.count).from(QItem.item)
+                .where(regDtsAfter(itemSearchDto.getSearchDateType()),
+                        searchSellStatusEq(itemSearchDto.getSearchSellStatus()),
+                        searchByLike(itemSearchDto.getSearchBy(), itemSearchDto.getSearchQuery()))
+                .fetchOne();
+
         return new PageImpl<>(content, pageable, total); //8
     }
 
