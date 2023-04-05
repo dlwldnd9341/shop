@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.shop.entity.Item;
 
-public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item> {
+public interface ItemRepository extends JpaRepository<Item, Long>, QuerydslPredicateExecutor<Item>, ItemRepositoryCustom {
 
     //ItemNm에서 조건 값 찾기
     List<Item> findByItemNm(String itemNm);
