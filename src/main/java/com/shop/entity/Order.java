@@ -32,8 +32,4 @@ public class Order extends BaseEntity {
                orphanRemoval = true, fetch = FetchType.LAZY) //orphanRemoval 고아객체사용, 지연로딩
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    private LocalDateTime regTime;      //등록시간
-
-    private LocalDateTime updateTime;   //수정시간
-
 }
